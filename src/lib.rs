@@ -1,10 +1,14 @@
+use commands::{save, ExecutionError};
+
+pub mod commands;
+
 #[derive(Debug)]
 pub struct RplcArguments {
     pub command: Command,
     pub rest: Vec<String>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Command {
     Save,
     Spawn,
@@ -37,4 +41,14 @@ pub fn parse_args() -> Result<RplcArguments, ParsingError> {
         command,
         rest: args.take_while(|_| true).collect(),
     })
+}
+
+pub fn run_command(args: RplcArguments) -> Result<(), ExecutionError> {
+    match args.command {
+        Command::Save => save::run(args.rest),
+        Command::Spawn => todo!(),
+        Command::List => todo!(),
+        Command::Delete => todo!(),
+        Command::Set => todo!(),
+    }
 }

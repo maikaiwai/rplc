@@ -1,4 +1,4 @@
-use rplc::{parse_args, ParsingError};
+use rplc::{commands::ExecutionError, parse_args, ParsingError};
 
 fn main() -> anyhow::Result<()> {
     let args = match parse_args() {
@@ -13,7 +13,24 @@ fn main() -> anyhow::Result<()> {
         }
     };
 
-    println!("{:?}", args);
+    let name = args.command.clone();
 
-    Ok(())
+    match rplc::run_command(args) {
+        Ok(_) => Ok(()),
+        Err(ExecutionError::MissingArguments(arg)) => {
+            println!("'{:?}' is missing an argument: '{:?}'.", name, arg);
+            return Ok(());
+        }
+        Err(ExecutionError::WrongArguments(arg, expected)) => {
+            println!(
+                "'{:?}' received the wrong arguments: '{}' expected to be {}.",
+                name, arg, expected
+            );
+            return Ok(());
+        }
+        Err(ExecutionError::Other(err)) => {
+            println!("'{:?}' failed to be executed: {}", name, err);
+            return Ok(());
+        }
+    }
 }
