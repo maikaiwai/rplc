@@ -1,4 +1,4 @@
-use commands::save;
+use commands::{save, spawn};
 use std::env;
 
 pub mod commands;
@@ -54,7 +54,7 @@ impl CommandBuilder {
     pub fn run(self) -> Result<(), RplcError> {
         match self.command {
             Some(Command::Save) => save::run(self.args),
-            Some(Command::Spawn) => todo!(),
+            Some(Command::Spawn) => spawn::run(self.args),
             Some(Command::List) => todo!(),
             Some(Command::Delete) => todo!(),
             Some(Command::Set) => todo!(),

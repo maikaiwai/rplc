@@ -2,23 +2,16 @@ use crate::RplcError;
 use std::{env, fs};
 use xdg::BaseDirectories;
 
+use super::get_filename;
+
 pub fn run(args: Vec<String>) -> Result<(), RplcError> {
-    let file_name = match args.first() {
-        Some(filename) if filename == "." => {
-            return Err(RplcError::WrongArgument(
-                String::from("filename"),
-                String::from("not a directory"),
-            ))
-        }
-        Some(filename) => filename,
-        None => return Err(RplcError::MissingArguments(String::from("filename"))),
-    };
+    let filename = get_filename(args)?;
 
     let path = match env::current_dir() {
         Ok(path) => path,
         Err(err) => return Err(RplcError::Other(err.to_string())),
     };
-    let file_path = format!("{}/{}", path.display(), file_name);
+    let file_path = format!("{}/{}", path.display(), filename);
 
     let dirs = match BaseDirectories::new() {
         Ok(dirs) => dirs,
@@ -30,11 +23,7 @@ pub fn run(args: Vec<String>) -> Result<(), RplcError> {
         }
     };
     let data_path = match dirs.create_data_directory("rplc") {
-        Ok(data_path) => format!(
-            "{}/{}",
-            data_path.as_path().display().to_string(),
-            file_name
-        ),
+        Ok(data_path) => format!("{}/{}", data_path.as_path().display().to_string(), filename),
         Err(err) => {
             return Err(RplcError::Other(format!(
                 "couldn't validate data directory: {}",
@@ -45,11 +34,11 @@ pub fn run(args: Vec<String>) -> Result<(), RplcError> {
 
     match fs::copy(file_path, data_path) {
         Ok(_) => {
-            println!("added '{}' to memory.", file_name);
+            println!("added '{}' to memory.", filename);
             Ok(())
         }
         Err(err) => {
-            println!("failed to add '{}' to memory.", file_name);
+            println!("failed to add '{}' to memory.", filename);
             Err(RplcError::Other(err.to_string()))
         }
     }
