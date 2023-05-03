@@ -1,11 +1,15 @@
-use commands::{save, ExecutionError};
+use commands::save;
+use std::env;
 
 pub mod commands;
 
 #[derive(Debug)]
-pub struct RplcArguments {
-    pub command: Command,
-    pub rest: Vec<String>,
+pub enum RplcError {
+    MissingArguments(String),
+    WrongArgument(String, String),
+    UnknownCommand(String),
+    NoCommand,
+    Other(String),
 }
 
 #[derive(Debug, Clone)]
@@ -17,38 +21,44 @@ pub enum Command {
     Set,
 }
 
-pub enum ParsingError {
-    NoCommand,
-    UnknownCommand,
+pub struct CommandBuilder {
+    pub command: Option<Command>,
+    pub args: Vec<String>,
 }
 
-pub fn parse_args() -> Result<RplcArguments, ParsingError> {
-    use std::env;
+impl CommandBuilder {
+    pub fn new() -> Self {
+        CommandBuilder {
+            command: None,
+            args: vec![],
+        }
+    }
 
-    let mut args = env::args();
+    pub fn parse(mut self, mut args: env::Args) -> Result<Self, RplcError> {
+        let command = match args.nth(1) {
+            Some(arg) if arg == "save" => Command::Save,
+            Some(arg) if arg == "spawn" => Command::Spawn,
+            Some(arg) if arg == "list" => Command::List,
+            Some(arg) if arg == "delete" => Command::Delete,
+            Some(arg) if arg == "set" => Command::Set,
+            Some(arg) => return Err(RplcError::UnknownCommand(arg)),
+            None => return Err(RplcError::NoCommand),
+        };
 
-    let command = match args.nth(1) {
-        Some(arg) if arg == "save" => Command::Save,
-        Some(arg) if arg == "spawn" => Command::Spawn,
-        Some(arg) if arg == "list" => Command::List,
-        Some(arg) if arg == "delete" => Command::Delete,
-        Some(arg) if arg == "set" => Command::Set,
-        Some(_) => return Err(ParsingError::UnknownCommand),
-        None => return Err(ParsingError::NoCommand),
-    };
+        self.command = Some(command);
+        self.args = args.take_while(|_| true).collect();
 
-    Ok(RplcArguments {
-        command,
-        rest: args.take_while(|_| true).collect(),
-    })
-}
+        Ok(self)
+    }
 
-pub fn run_command(args: RplcArguments) -> Result<(), ExecutionError> {
-    match args.command {
-        Command::Save => save::run(args.rest),
-        Command::Spawn => todo!(),
-        Command::List => todo!(),
-        Command::Delete => todo!(),
-        Command::Set => todo!(),
+    pub fn run(self) -> Result<(), RplcError> {
+        match self.command {
+            Some(Command::Save) => save::run(self.args),
+            Some(Command::Spawn) => todo!(),
+            Some(Command::List) => todo!(),
+            Some(Command::Delete) => todo!(),
+            Some(Command::Set) => todo!(),
+            None => todo!(),
+        }
     }
 }
