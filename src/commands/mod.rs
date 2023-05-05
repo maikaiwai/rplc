@@ -2,9 +2,11 @@ use xdg::BaseDirectories;
 
 use crate::RplcError;
 
+pub mod list;
 pub mod save;
 pub mod spawn;
 
+/// Extracts the file name from a vector of arguments.
 pub fn get_filename(args: Vec<String>) -> Result<String, RplcError> {
     match args.first() {
         Some(filename) if filename == "." => {
@@ -18,6 +20,7 @@ pub fn get_filename(args: Vec<String>) -> Result<String, RplcError> {
     }
 }
 
+/// Gets a file's path in the data directory.
 pub fn find_data_file(filename: &str) -> Result<String, RplcError> {
     let dirs = match BaseDirectories::new() {
         Ok(dirs) => dirs,
