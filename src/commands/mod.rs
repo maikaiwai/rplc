@@ -2,6 +2,7 @@ use xdg::BaseDirectories;
 
 use crate::RplcError;
 
+pub mod delete;
 pub mod list;
 pub mod save;
 pub mod spawn;

@@ -1,4 +1,4 @@
-use commands::{list, save, spawn};
+use commands::{delete, list, save, spawn};
 use std::env;
 
 pub mod commands;
@@ -55,8 +55,8 @@ impl CommandBuilder {
         match self.command {
             Some(Command::Save) => save::run(self.args),
             Some(Command::Spawn) => spawn::run(self.args),
-            Some(Command::List) => list::run(self.args),
-            Some(Command::Delete) => todo!(),
+            Some(Command::List) => list::run(),
+            Some(Command::Delete) => delete::run(self.args),
             Some(Command::Set) => todo!(),
             None => todo!(),
         }

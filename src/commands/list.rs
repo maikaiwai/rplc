@@ -4,7 +4,7 @@ use crate::RplcError;
 
 use super::find_data_file;
 
-pub fn run(_: Vec<String>) -> Result<(), RplcError> {
+pub fn run() -> Result<(), RplcError> {
     let data_dir = find_data_file("")?;
 
     match fs::read_dir(data_dir) {
